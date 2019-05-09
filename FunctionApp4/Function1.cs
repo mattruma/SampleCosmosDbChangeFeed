@@ -17,8 +17,6 @@ namespace FunctionApp4
             LeaseCollectionName = "FunctionApp4-Function1-leases",
             CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> documents, ILogger log)
         {
-            log.LogInformation("Function1 function processed a request.");
-
             if (documents != null)
             {
                 foreach (var document in documents)

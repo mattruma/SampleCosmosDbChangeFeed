@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.WebJobs;
@@ -17,14 +18,27 @@ namespace FunctionApp1
             LeaseCollectionName = "FunctionApp2-leases",
             CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> documents, ILogger log)
         {
-            log.LogInformation("Function1 function processed a request.");
+            // https://anthonychu.ca/post/scaling-azure-functions-http/
+
+            var instanceId =
+                Environment.GetEnvironmentVariable(
+                    "WEBSITE_INSTANCE_ID",
+                    EnvironmentVariableTarget.Process);
+
+            log.LogInformation($"Running on instance {instanceId}.");
 
             if (documents != null)
             {
+                log.LogInformation($"{nameof(Function1)} received {documents.Count} document(s).");
+
                 foreach (var document in documents)
                 {
-                    log.LogInformation(JsonConvert.SerializeObject(document, Formatting.Indented));
+                    log.LogDebug(JsonConvert.SerializeObject(document, Formatting.Indented));
                 }
+            }
+            else
+            {
+                log.LogInformation($"{nameof(Function1)} received 0 document(s).");
             }
         }
     }

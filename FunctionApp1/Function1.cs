@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Microsoft.Azure.Cosmos;
 using System.Collections.Generic;
 using FunctionApp1.Data;
+using NLipsum.Core;
 
 namespace FunctionApp1
 {
@@ -41,26 +42,28 @@ namespace FunctionApp1
         [FunctionName("Function1")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req,
-            [FromQuery] int? numberToCreate,
             ILogger log)
         {
-            log.LogInformation("Function1 function processed a request.");
-
-            if (numberToCreate == null || numberToCreate < 1)
-            {
-                numberToCreate = 1;
-            }
+            var toDoItemAdd =
+                JsonConvert.DeserializeObject<ToDoItemAdd>(
+                    await new StreamReader(req.Body).ReadToEndAsync());
 
             var toDoItemDocumentList =
                 new List<ToDoItem>();
 
-            for (var index = 0; index < numberToCreate; index++)
-            {
-                var toDoItem = JsonConvert.DeserializeObject<ToDoItem>(
-                    await new StreamReader(req.Body).ReadToEndAsync());
+            var toDoItemContainer =
+               _cosmosDatabase.Containers["Items"];
 
-                var toDoItemContainer =
-                   _cosmosDatabase.Containers["Items"];
+            var lipsumGenerator = 
+                new LipsumGenerator(Lipsums.LoremIpsum, false);
+
+            for (var index = 0; index < toDoItemAdd.Copies; index++)
+            {
+                var toDoItem = 
+                    new ToDoItem
+                    {
+                        Description = lipsumGenerator.GenerateSentences(1)[0]
+                    };
 
                 var toDoItemDocument =
                     await toDoItemContainer.Items.CreateItemAsync<ToDoItem>(
@@ -73,7 +76,7 @@ namespace FunctionApp1
                 toDoItemDocumentList.Add(toDoItemDocument.Resource);
             }
 
-            return new OkObjectResult(toDoItemDocumentList);
+            return new OkObjectResult($"Created {toDoItemDocumentList.Count} documents.");
         }
     }
 }
