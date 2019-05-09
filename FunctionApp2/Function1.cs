@@ -10,6 +10,7 @@ namespace FunctionApp1
     public static class Function1
     {
         [FunctionName("Function1")]
+        [Disable("FunctionApp2:Function1-Disable")]
         public static void Run([CosmosDBTrigger(
             databaseName: "ToDoList",
             collectionName: "Items",
@@ -18,15 +19,6 @@ namespace FunctionApp1
             LeaseCollectionName = "FunctionApp2-leases",
             CreateLeaseCollectionIfNotExists = true)]IReadOnlyList<Document> documents, ILogger log)
         {
-            // https://anthonychu.ca/post/scaling-azure-functions-http/
-
-            var instanceId =
-                Environment.GetEnvironmentVariable(
-                    "WEBSITE_INSTANCE_ID",
-                    EnvironmentVariableTarget.Process);
-
-            log.LogInformation($"Running on instance {instanceId}.");
-
             if (documents != null)
             {
                 log.LogInformation($"{nameof(Function1)} received {documents.Count} document(s).");
