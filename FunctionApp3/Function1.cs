@@ -20,10 +20,16 @@ namespace FunctionApp3
         {
             if (documents != null)
             {
+                log.LogInformation($"{nameof(Function1)} received {documents.Count} document(s).");
+
                 foreach (var document in documents)
                 {
-                    log.LogInformation(JsonConvert.SerializeObject(document, Formatting.Indented));
+                    log.LogDebug(JsonConvert.SerializeObject(document, Formatting.Indented));
                 }
+            }
+            else
+            {
+                log.LogInformation($"{nameof(Function1)} received 0 document(s).");
             }
         }
     }
