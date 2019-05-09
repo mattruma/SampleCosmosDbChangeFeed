@@ -10,7 +10,6 @@ namespace FunctionApp1
     public static class Function2
     {
         [FunctionName("Function2")]
-        [Disable("FunctionApp2:Function2-Disable")]
         public static void Run([CosmosDBTrigger(
             databaseName: "ToDoList",
             collectionName: "Items",
